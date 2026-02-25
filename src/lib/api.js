@@ -60,6 +60,13 @@ export async function acceptFriendRequest(requestId) {
 }
 
 export async function getStreamToken() {
-  const response = await axiosInstance.get("/chat/token");
-  return response.data;
+  try {
+    console.log("🔄 Fetching Stream token from backend...");
+    const response = await axiosInstance.get("/chat/token");
+    console.log("✅ Token response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("❌ Stream token fetch failed:", error.response?.data || error.message);
+    throw error;
+  }
 }

@@ -30,7 +30,7 @@ const ChatPage = () => {
 
   const { authUser } = useAuthUser();
 
-  const { data: tokenData } = useQuery({
+  const { data: tokenData, error: tokenError, isLoading: isTokenLoading } = useQuery({
     queryKey: ["streamToken"],
     queryFn: getStreamToken,
     enabled: !!authUser, // this will run only when authUser is available
@@ -38,7 +38,22 @@ const ChatPage = () => {
 
   useEffect(() => {
     const initChat = async () => {
-      if (!tokenData?.token || !authUser) return;
+      if (isTokenLoading) {
+        console.log("⏳ Waiting for token...");
+        return;
+      }
+
+      if (tokenError) {
+        console.error("❌ Token fetch failed:", tokenError);
+        toast.error(`Failed to get chat token: ${tokenError.message || "Unknown error"}`);
+        setLoading(false);
+        return;
+      }
+
+      if (!tokenData?.token || !authUser) {
+        console.warn("⚠️ Missing token or authUser:", { tokenData, authUser });
+        return;
+      }
 
       try {
         console.log("Initializing stream chat client...");
